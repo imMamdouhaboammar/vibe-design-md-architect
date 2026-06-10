@@ -1,6 +1,6 @@
 {
   "name": "vibe-design-md-architect",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "Autopilot design quality gates for AI-assisted UI — 23 hard-blocking gates that create, audit, and amplify PRODUCT.md and DESIGN.md before implementation. Stops generic AI-looking frontend before it starts.",
   "type": "module",
   "exports": {
