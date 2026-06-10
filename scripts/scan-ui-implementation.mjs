@@ -36,9 +36,9 @@ const rules = [
   // decorative glass default
   { name: 'decorative glass default (anti-slop)', level: 'warning', pattern: /glassmorphism|backdrop-blur|bg-white\/10|bg-black\/10/gi },
   // emoji as UI
-  { name: 'emoji used in UI source (icon system)', level: 'warning', pattern: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu },
-  // sparkle / magic icons
-  { name: 'sparkle or magic icon default (anti-slop)', level: 'warning', pattern: /\b(Sparkles?|Wand2?|MagicWand|Starburst|Glitter|Robot)\b/g },
+  { name: 'emoji used in UI source (icon system)', level: 'blocker', pattern: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu },
+  // sparkle / magic icons / brain icons
+  { name: 'sparkle, brain, or magic icon default (anti-slop)', level: 'blocker', pattern: /\b(Sparkles?|Wand2?|MagicWand|Starburst|Glitter|Robot|Brain)\b/g },
   // V1 viewport: fixed 100vw wrapper may cause horizontal overflow
   { name: 'fixed 100vw wrapper may cause horizontal overflow (V1)', level: 'warning', pattern: /\b(width:\s*100vw|w-screen)\b/gi },
   // V2 viewport: blind 100vh full-page height
