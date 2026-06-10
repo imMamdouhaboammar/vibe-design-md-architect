@@ -1,11 +1,11 @@
 import { rule, has } from './utils.js';
 
 export const accessibilityRules = [
-  rule('missing-keyboard-navigation', 'DESIGN.md needs keyboard navigation rules', 'accessibility', 'warning', 'DESIGN.md', (ctx) => {
+  rule('missing-keyboard-navigation', 'DESIGN.md needs keyboard navigation rules', 'accessibility', 'error', 'DESIGN.md', (ctx) => {
     return ctx.files['DESIGN.md'] && !has(ctx.files['DESIGN.md'], /(keyboard|tab order|focus)/i);
   }, 'Add keyboard and focus requirements.', 'auto'),
 
-  rule('deterministic-focus-management', 'DESIGN.md must use deterministic focus rings', 'accessibility', 'warning', 'DESIGN.md', (ctx) => {
+  rule('deterministic-focus-management', 'DESIGN.md must use deterministic focus rings', 'accessibility', 'error', 'DESIGN.md', (ctx) => {
     const d = ctx.files['DESIGN.md'];
     if (!d) return false;
     return /focus/i.test(d) && !/(focus-visible|ring-|outline-none)/i.test(d);

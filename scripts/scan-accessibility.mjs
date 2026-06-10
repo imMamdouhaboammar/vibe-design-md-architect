@@ -75,11 +75,11 @@ function scanFile(file) {
   const headings = [...content.matchAll(/<h([1-6])\b/gi)].map(m => ({ level: +m[1], index: m.index }));
   const h1s = headings.filter(h => h.level === 1);
   if (h1s.length > 1) {
-    add('warning', '1.3.1', `more than one <h1> in a single file (${h1s.length})`, file, lineOf(content, h1s[1].index), '<h1>');
+    add('blocker', '1.3.1', `more than one <h1> in a single file (${h1s.length})`, file, lineOf(content, h1s[1].index), '<h1>');
   }
   for (let i = 1; i < headings.length; i++) {
     if (headings[i].level - headings[i - 1].level > 1) {
-      add('warning', '1.3.1', `heading level jumps from h${headings[i - 1].level} to h${headings[i].level} (skipped level)`, file, lineOf(content, headings[i].index), `<h${headings[i].level}>`);
+      add('blocker', '1.3.1', `heading level jumps from h${headings[i - 1].level} to h${headings[i].level} (skipped level)`, file, lineOf(content, headings[i].index), `<h${headings[i].level}>`);
     }
   }
 
@@ -101,14 +101,14 @@ function scanFile(file) {
 
   // 6. Positive tabindex (WCAG 2.4.3).
   for (const m of content.matchAll(/tab[iI]ndex\s*=\s*["'{]?\s*([1-9]\d*)/g)) {
-    add('warning', '2.4.3', `positive tabindex (${m[1]}) breaks natural focus order; use 0 or -1`, file, lineOf(content, m.index), m[0]);
+    add('blocker', '2.4.3', `positive tabindex (${m[1]}) breaks natural focus order; use 0 or -1`, file, lineOf(content, m.index), m[0]);
   }
 
   // 7. Invalid or redundant role values (WCAG 4.1.2).
   for (const m of content.matchAll(/\brole\s*=\s*["']([a-z\- ]+)["']/gi)) {
     const roleVal = m[1].trim().toLowerCase().split(/\s+/)[0];
     if (roleVal && !validRoles.has(roleVal)) {
-      add('warning', '4.1.2', `unknown ARIA role "${roleVal}"`, file, lineOf(content, m.index), m[0]);
+      add('blocker', '4.1.2', `unknown ARIA role "${roleVal}"`, file, lineOf(content, m.index), m[0]);
     }
   }
   for (const { el, role } of redundantRole) {
@@ -125,7 +125,7 @@ function scanFile(file) {
     const textInner = inner.replace(/<[^>]+>/g, '').replace(/\{[^}]*\}/g, '').replace(/[\s\u00A0]+/g, '');
     const hasIcon = /<svg\b|<[A-Z][A-Za-z0-9]*Icon\b|<Icon\b|lucide|className=["'][^"']*\bicon\b/.test(inner);
     if (!named && !textInner && hasIcon) {
-      add('warning', '4.1.2', `icon-only <${tag.toLowerCase()}> with no accessible name (add aria-label)`, file, lineOf(content, m.index), m[0].slice(0, 120));
+      add('blocker', '4.1.2', `icon-only <${tag.toLowerCase()}> with no accessible name (add aria-label)`, file, lineOf(content, m.index), m[0].slice(0, 120));
     }
   }
 
@@ -139,7 +139,7 @@ function scanFile(file) {
     const labeled = /aria-label\s*=|aria-labelledby\s*=/i.test(attrs);
     const hasId = /\bid\s*=/i.test(attrs);
     if (!labeled && !hasId) {
-      add('warning', '1.3.1', `<${tag}> has no label association (add a <label for>, id, or aria-label)`, file, lineOf(content, m.index), m[0].slice(0, 120));
+      add('blocker', '1.3.1', `<${tag}> has no label association (add a <label for>, id, or aria-label)`, file, lineOf(content, m.index), m[0].slice(0, 120));
     }
   }
 
@@ -172,13 +172,13 @@ function scanFile(file) {
     idCounts[m[1]] = (idCounts[m[1]] || 0) + 1;
   }
   for (const [id, count] of Object.entries(idCounts)) {
-    if (count > 1) add('warning', '4.1.1', `duplicate id "${id}" used ${count} times in one file`, file, 0, `id="${id}"`);
+    if (count > 1) add('blocker', '4.1.1', `duplicate id "${id}" used ${count} times in one file`, file, 0, `id="${id}"`);
   }
 
   // 13. HTML documents: <html> language and direction (WCAG 3.1.1).
   if (isHtml && /<html\b/i.test(content)) {
     const htmlTag = content.match(/<html\b[^>]*>/i)[0];
-    if (!/\blang\s*=/.test(htmlTag)) add('warning', '3.1.1', '<html> missing lang attribute', file, lineOf(content, content.search(/<html\b/i)), htmlTag);
+    if (!/\blang\s*=/.test(htmlTag)) add('blocker', '3.1.1', '<html> missing lang attribute', file, lineOf(content, content.search(/<html\b/i)), htmlTag);
     if (!/\bdir\s*=/.test(htmlTag)) add('info', '1.3.2', '<html> has no dir attribute (set dir="rtl" for Arabic shells)', file, lineOf(content, content.search(/<html\b/i)), htmlTag);
   }
 
@@ -216,7 +216,7 @@ if (!files.length) {
 for (const file of files) scanFile(file);
 
 const blockers = findings.filter(f => f.level === 'blocker');
-const warnings = findings.filter(f => f.level === 'warning');
+const warnings = findings.filter(f => f.level === 'blocker');
 const infos = findings.filter(f => f.level === 'info');
 
 function print(group, label) {
@@ -230,7 +230,7 @@ function print(group, label) {
 }
 
 print(infos, 'info');
-print(warnings, 'warning');
+print(warnings, 'blocker');
 print(blockers, 'blocker');
 
 const failOn = strict ? blockers.length + warnings.length : blockers.length;

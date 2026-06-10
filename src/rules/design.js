@@ -1,7 +1,7 @@
 import { rule, has } from './utils.js';
 
 export const designRules = [
-  rule('overflow-hidden-risk', 'overflow: hidden may mask layout bugs', 'risk-control', 'warning', 'DESIGN.md', (ctx) => {
+  rule('overflow-hidden-risk', 'overflow: hidden may mask layout bugs', 'risk-control', 'error', 'DESIGN.md', (ctx) => {
     return ctx.files['DESIGN.md'] && /overflow\s*:\s*hidden/i.test(ctx.files['DESIGN.md']) && !/intentional|mask|clip|layout bug/i.test(ctx.files['DESIGN.md']);
   }, 'Document why overflow hidden is needed or remove it.', 'suggested'),
 

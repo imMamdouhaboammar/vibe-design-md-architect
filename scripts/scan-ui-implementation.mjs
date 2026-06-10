@@ -9,7 +9,7 @@ const target = process.argv[2] || 'src';
 const exts = new Set(['.js', '.jsx', '.ts', '.tsx', '.html', '.vue', '.svelte', '.css', '.scss', '.mdx']);
 const skipDirs = new Set(['node_modules', '.next', 'dist', 'build', '.git', 'coverage', '.turbo', '.vercel']);
 
-// level: 'blocker' fails the run; 'warning' is reported only.
+// level: 'blocker' fails the run; 'blocker' is reported only.
 const rules = [
   // F2 native popups
   { name: 'native browser popup: alert', level: 'blocker', pattern: /\b(?:window\.)?alert\s*\(/g },
@@ -19,52 +19,52 @@ const rules = [
   { name: 'clickable div instead of button/link (A1)', level: 'blocker', pattern: /<div[^>]*\bonClick\b/gi },
   { name: 'clickable span instead of button/link (A1)', level: 'blocker', pattern: /<span[^>]*\bonClick\b/gi },
   // A2/A4 focus removed with no replacement (warning: scanner cannot prove a focus-visible fallback exists)
-  { name: 'focus outline removed, verify focus-visible fallback (A2/A4)', level: 'warning', pattern: /outline:\s*['"]?none|outline-none/gi },
+  { name: 'focus outline removed, verify focus-visible fallback (A2/A4)', level: 'blocker', pattern: /outline:\s*['"]?none|outline-none/gi },
   // C2 placeholder / fake data
   { name: 'lorem ipsum placeholder content (C2)', level: 'blocker', pattern: /lorem\s+ipsum/gi },
   { name: 'fake data: John Doe / Jane Doe (C2)', level: 'blocker', pattern: /\b(John|Jane)\s+Doe\b/g },
   { name: 'fake data: example email (C2)', level: 'blocker', pattern: /\b[\w.]+@example\.(com|org|net)\b/gi },
-  { name: 'fake data: Item 1/2/3 (C2)', level: 'warning', pattern: /\bItem\s+1\b[\s\S]{0,40}\bItem\s+2\b/g },
+  { name: 'fake data: Item 1/2/3 (C2)', level: 'blocker', pattern: /\bItem\s+1\b[\s\S]{0,40}\bItem\s+2\b/g },
   // B2 generic gradient
-  { name: 'generic gradient identity (B2)', level: 'warning', pattern: /bg-gradient|from-purple|to-blue|from-blue|to-purple|from-fuchsia|to-cyan|from-indigo|to-indigo|aurora|neon/gi },
+  { name: 'generic gradient identity (B2)', level: 'blocker', pattern: /bg-gradient|from-purple|to-blue|from-blue|to-purple|from-fuchsia|to-cyan|from-indigo|to-indigo|aurora|neon/gi },
   // B3 default font
-  { name: 'default Inter font, no brand justification (B3)', level: 'warning', pattern: /font-family:\s*['"]?Inter\b|font-\[Inter\]/gi },
+  { name: 'default Inter font, no brand justification (B3)', level: 'blocker', pattern: /font-family:\s*['"]?Inter\b|font-\[Inter\]/gi },
   // E1 hardcoded values
-  { name: 'hardcoded hex color outside tokens (E1)', level: 'warning', pattern: /(?:color|background(?:-color)?|border-color|fill|stroke):\s*#[0-9a-fA-F]{3,8}\b/g },
+  { name: 'hardcoded hex color outside tokens (E1)', level: 'blocker', pattern: /(?:color|background(?:-color)?|border-color|fill|stroke):\s*#[0-9a-fA-F]{3,8}\b/g },
   // D2 overflow trap
-  { name: 'blanket overflow:hidden on layout container (D2)', level: 'warning', pattern: /overflow:\s*hidden|overflow-hidden/gi },
+  { name: 'blanket overflow:hidden on layout container (D2)', level: 'blocker', pattern: /overflow:\s*hidden|overflow-hidden/gi },
   // decorative glass default
-  { name: 'decorative glass default (anti-slop)', level: 'warning', pattern: /glassmorphism|backdrop-blur|bg-white\/10|bg-black\/10/gi },
+  { name: 'decorative glass default (anti-slop)', level: 'blocker', pattern: /glassmorphism|backdrop-blur|bg-white\/10|bg-black\/10/gi },
   // emoji as UI
   { name: 'emoji used in UI source (icon system)', level: 'blocker', pattern: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu },
   // sparkle / magic icons / brain icons
   { name: 'sparkle, brain, or magic icon default (anti-slop)', level: 'blocker', pattern: /\b(Sparkles?|Wand2?|MagicWand|Starburst|Glitter|Robot|Brain)\b/g },
   // V1 viewport: fixed 100vw wrapper may cause horizontal overflow
-  { name: 'fixed 100vw wrapper may cause horizontal overflow (V1)', level: 'warning', pattern: /\b(width:\s*100vw|w-screen)\b/gi },
+  { name: 'fixed 100vw wrapper may cause horizontal overflow (V1)', level: 'blocker', pattern: /\b(width:\s*100vw|w-screen)\b/gi },
   // V2 viewport: blind 100vh full-page height
-  { name: 'blind 100vh full-page height (V2)', level: 'warning', pattern: /\b(height:\s*100vh|h-screen)\b/gi },
+  { name: 'blind 100vh full-page height (V2)', level: 'blocker', pattern: /\b(height:\s*100vh|h-screen)\b/gi },
   // V3 viewport: fixed auth card width without responsive max
-  { name: 'fixed auth card width without responsive max (V3)', level: 'warning', pattern: /\.(auth-card|login-card|signup-card)[^{]{0,80}\{[^}]*(width:\s*[4-9]\d\dpx)/gi },
+  { name: 'fixed auth card width without responsive max (V3)', level: 'blocker', pattern: /\.(auth-card|login-card|signup-card)[^{]{0,80}\{[^}]*(width:\s*[4-9]\d\dpx)/gi },
   // V4 Tailwind: h-screen used without dvh/min-h fallback
-  { name: 'Tailwind h-screen used without dvh/min-h fallback (V4)', level: 'warning', pattern: /\bh-screen\b/g },
+  { name: 'Tailwind h-screen used without dvh/min-h fallback (V4)', level: 'blocker', pattern: /\bh-screen\b/g },
   // V5 Tailwind: w-screen with padding risk
-  { name: 'Tailwind w-screen with padding risk (V5)', level: 'warning', pattern: /\bw-screen\b/g },
+  { name: 'Tailwind w-screen with padding risk (V5)', level: 'blocker', pattern: /\bw-screen\b/g },
   // M1 modal: dialog/modal without aria-labelledby or aria-label
-  { name: 'modal/dialog without accessible name (M1)', level: 'warning', pattern: /role\s*=\s*["']dialog["'][^>]{0,200}(?!aria-label)/gi },
+  { name: 'modal/dialog without accessible name (M1)', level: 'blocker', pattern: /role\s*=\s*["']dialog["'][^>]{0,200}(?!aria-label)/gi },
   // M2 modal: placeholder used without visible label nearby (heuristic)
-  { name: 'input with placeholder but potentially missing label (M2)', level: 'warning', pattern: /<input[^>]*placeholder\s*=[^>]*(?!<label)/gi },
+  { name: 'input with placeholder but potentially missing label (M2)', level: 'blocker', pattern: /<input[^>]*placeholder\s*=[^>]*(?!<label)/gi },
   // M3 modal: close button with small size risk
-  { name: 'close button may have insufficient target size (M3)', level: 'warning', pattern: /\b(w-4|w-5|h-4|h-5|w-\[16px\]|h-\[16px\]|w-\[20px\]|h-\[20px\])\b[^"']*close/gi },
+  { name: 'close button may have insufficient target size (M3)', level: 'blocker', pattern: /\b(w-4|w-5|h-4|h-5|w-\[16px\]|h-\[16px\]|w-\[20px\]|h-\[20px\])\b[^"']*close/gi },
   // M4 modal: fixed modal width without responsive max
-  { name: 'fixed modal width without responsive max (M4)', level: 'warning', pattern: /\.(modal|dialog|drawer)[^{]{0,80}\{[^}]*(width:\s*[4-9]\d\dpx)/gi },
+  { name: 'fixed modal width without responsive max (M4)', level: 'blocker', pattern: /\.(modal|dialog|drawer)[^{]{0,80}\{[^}]*(width:\s*[4-9]\d\dpx)/gi },
   // O1 overlay: manual fixed toast in page component
   { name: 'manual fixed toast in page component (O1)', level: 'blocker', pattern: /position:\s*fixed[\s\S]{0,160}(toast|snackbar|notification|success-message)/i },
   // O2 overlay: hardcoded bottom-left/right toast placement
-  { name: 'hardcoded toast placement (O2)', level: 'warning', pattern: /(bottom:\s*\d+px[\s\S]{0,120}(left|right):\s*\d+px[\s\S]{0,60}(toast|snackbar|notification))|((toast|snackbar|notification)[\s\S]{0,120}bottom:\s*\d+px[\s\S]{0,60}(left|right):\s*\d+px)/i },
+  { name: 'hardcoded toast placement (O2)', level: 'blocker', pattern: /(bottom:\s*\d+px[\s\S]{0,120}(left|right):\s*\d+px[\s\S]{0,60}(toast|snackbar|notification))|((toast|snackbar|notification)[\s\S]{0,120}bottom:\s*\d+px[\s\S]{0,60}(left|right):\s*\d+px)/i },
   // O3 overlay: transparent toast surface
-  { name: 'transparent toast surface (O3)', level: 'warning', pattern: /(toast|snackbar|notification)[\s\S]{0,120}(bg-white\/|bg-green\/|rgba\([^)]*,\s*0\.[0-5]\))/i },
+  { name: 'transparent toast surface (O3)', level: 'blocker', pattern: /(toast|snackbar|notification)[\s\S]{0,120}(bg-white\/|bg-green\/|rgba\([^)]*,\s*0\.[0-5]\))/i },
   // O4 overlay: direct z-index in toast/overlay
-  { name: 'direct z-index in toast or overlay (O4)', level: 'warning', pattern: /(toast|snackbar|notification)[\s\S]{0,120}(z-index:\s*\d+|z-\[\d+\])/i },
+  { name: 'direct z-index in toast or overlay (O4)', level: 'blocker', pattern: /(toast|snackbar|notification)[\s\S]{0,120}(z-index:\s*\d+|z-\[\d+\])/i },
   // S1 sensitive: exposed API key or secret token pattern
   { name: 'exposed secret token pattern in display (S1)', level: 'blocker', pattern: /\b(sk_live_|sk_test_|pk_live_|pk_test_|whsec_|ghp_|gho_|glpat-)[a-zA-Z0-9]{8,}/g },
 ];
@@ -76,7 +76,7 @@ function scanOnClickWithoutKey(content, file, findings) {
     if (/\bonClick\s*=/.test(lines[i]) && /<(div|span|li|td|tr)\b/i.test(lines[i])) {
       const windowText = lines.slice(Math.max(0, i - 1), i + 3).join('\n');
       if (!/onKeyDown|onKeyUp|onKeyPress|role=/.test(windowText)) {
-        findings.push({ file, line: i + 1, level: 'warning', rule: 'onClick on non-interactive element without keyboard handler (A2)', excerpt: lines[i].trim().slice(0, 160) });
+        findings.push({ file, line: i + 1, level: 'blocker', rule: 'onClick on non-interactive element without keyboard handler (A2)', excerpt: lines[i].trim().slice(0, 160) });
       }
     }
   }
@@ -111,7 +111,7 @@ function scanModalWithoutFocusTrap(content, file, findings) {
     if (/role\s*=\s*["']dialog["']/i.test(line) || /\bDialog\b|\bModal\b/.test(line) && /</.test(line)) {
       const windowText = lines.slice(Math.max(0, i - 3), Math.min(lines.length, i + 15)).join('\n');
       if (!/FocusTrap|focus-trap|trapFocus|useFocusTrap|createFocusTrap|FocusScope|inert|aria-modal/i.test(windowText)) {
-        findings.push({ file, line: i + 1, level: 'warning', rule: 'modal/dialog without focus trap indicator (M5)', excerpt: line.trim().slice(0, 160) });
+        findings.push({ file, line: i + 1, level: 'blocker', rule: 'modal/dialog without focus trap indicator (M5)', excerpt: line.trim().slice(0, 160) });
       }
     }
   }
@@ -157,7 +157,7 @@ if (!files.length) {
 }
 
 const blockers = findings.filter(f => f.level === 'blocker');
-const warnings = findings.filter(f => f.level === 'warning');
+const warnings = findings.filter(f => f.level === 'blocker');
 
 if (warnings.length) {
   console.warn(`UI scan warnings (${warnings.length})`);

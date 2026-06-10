@@ -15,12 +15,12 @@ export async function doctor({ cwd, flags }) {
 
   // 2. Package.json
   if (!existsSync(resolve(cwd, 'package.json'))) {
-    issues.push({ id: 'package-json-missing', title: 'package.json not found in current directory', category: 'runtime', severity: 'warning', suggestedFix: 'Run from a project root.' });
+    issues.push({ id: 'package-json-missing', title: 'package.json not found in current directory', category: 'runtime', severity: 'error', suggestedFix: 'Run from a project root.' });
   }
   
   // 3. Git Repo Check
   if (!existsSync(resolve(cwd, '.git'))) {
-    issues.push({ id: 'git-repo-missing', title: 'Not a git repository.', category: 'runtime', severity: 'warning', suggestedFix: 'Run `git init` to track changes safely.' });
+    issues.push({ id: 'git-repo-missing', title: 'Not a git repository.', category: 'runtime', severity: 'error', suggestedFix: 'Run `git init` to track changes safely.' });
   }
 
   // 4. Writable Check
