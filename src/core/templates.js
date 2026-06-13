@@ -37,7 +37,7 @@ export const productTemplate = `# PRODUCT.md
 - The system must not [Constraint 1]
 
 ## Acceptance Criteria (Examples)
-- **Given** I am logged out, **when** I visit \\\`/dashboard\\\`, **then** I am redirected to \\\`/login\\\`.
+- **Given** I am logged out, **when** I visit \`/dashboard\`, **then** I am redirected to \`/login\`.
 - **Given** I am an admin, **when** I click 'Delete', **then** a confirmation modal appears before deletion.
 
 ## Constraints
@@ -62,10 +62,10 @@ export const designTemplate = `# DESIGN.md
 - Every interactive component needs loading, empty, error, disabled, hover, focus, and success states.
 
 ## Information Architecture & Routes
-- \\\`/\\\` -> Landing Page (Public)
-- \\\`/login\\\` -> Auth flow (Public)
-- \\\`/dashboard\\\` -> Main app (Protected, User role)
-- \\\`/admin\\\` -> Management (Protected, Admin role)
+- \`/\` -> Landing Page (Public)
+- \`/login\` -> Auth flow (Public)
+- \`/dashboard\` -> Main app (Protected, User role)
+- \`/admin\` -> Management (Protected, Admin role)
 
 ## Main Screens
 - **Dashboard**: [Displays key metrics, recent activity]
@@ -76,7 +76,7 @@ export const designTemplate = `# DESIGN.md
 - [UI] Button, Modal, Card, Input, Toast
 
 ## Responsive Behavior (Deterministic)
-- Mobile (<768px): Use \`flex-col\`, \`w-full\`, and \`p-4\` as defaults. Avoid \`height: 100vh\` (use \`min-h-[100dvh]\`).
+- Mobile (<768px): Use `flex-col`, `w-full`, and `p-4` as defaults. Avoid `height: 100vh` (use `min-h-[100dvh]`).
 - Tablet (\`md\`: 768px): Use \`md:grid-cols-2\`, \`md:flex-row\`, and \`md:p-6\`.
 - Desktop (\`lg\`: 1024px): Use \`lg:grid-cols-3\` and max-width containers (e.g., \`max-w-7xl mx-auto\`).
 
@@ -120,7 +120,7 @@ AI models cannot visually calculate WCAG contrast. You MUST follow mathematical 
 - Clear, direct, useful.
 `;
 
-export const agentTemplate = `# AGENT.md
+export const agentTemplate = `# Agent Instructions
 
 ## Read This First
 Before coding, inspect \`PRODUCT.md\`, \`DESIGN.md\`, \`package.json\`, routing files, component structure, and any existing tests. Do not rush to implementation without understanding the existing architecture.
@@ -158,8 +158,8 @@ Stop and ask for review when a change requires:
 - Making broad redesign decisions.
 
 ## Visual & Mobile QA Checklist
-- [ ] No horizontal scrolling on mobile (\\\`overflow-x-hidden\\\` checked).
-- [ ] Tap targets are at least \\\`44x44px\\\` for touch devices.
+- [ ] No horizontal scrolling on mobile (\`overflow-x-hidden\` checked).
+- [ ] Tap targets are at least \`44x44px\` for touch devices.
 - [ ] Color contrast passes mathematical deltas.
 - [ ] All forms have explicit validation boundaries and error messages.
 `;
@@ -167,6 +167,6 @@ Stop and ask for review when a change requires:
 export function templateFor(file) {
   if (file === 'PRODUCT.md') return productTemplate;
   if (file === 'DESIGN.md') return designTemplate;
-  if (file === 'AGENT.md') return agentTemplate;
+  if (file === 'AGENT.md' || file === 'AGENTS.md') return agentTemplate;
   return '';
 }
