@@ -1,19 +1,39 @@
 import { writeText } from './filesystem.js';
 
+function categoryLines(categories = {}) {
+  const entries = Object.entries(categories);
+  if (!entries.length) return [];
+
+  return [
+    '',
+    '## Category Breakdown',
+    '',
+    ...entries
+      .sort(([, a], [, b]) => b.total - a.total)
+      .map(([name, data]) => `- **${name}**: ${data.total} total (${data.errors} errors, ${data.warnings} warnings, ${data.info} info)`)
+  ];
+}
+
 export function buildMarkdownReport(result) {
+  const summary = result.summary || {};
   const lines = [
     '# Vibe Design MD Architect Report', 
     '', 
-    `Score: **${result.summary.score}/100**`, 
-    `Checks: ${result.summary.checks} | Errors: ${result.summary.errors} | Warnings: ${result.summary.warnings} | Info: ${result.summary.info}`, 
+    `Score: **${summary.score}/100**`, 
+    `Readiness: **${summary.readiness || 'unknown'}**`,
+    summary.readinessMessage ? `Decision: ${summary.readinessMessage}` : '',
+    `Checks: ${summary.checks} | Errors: ${summary.errors} | Warnings: ${summary.warnings} | Info: ${summary.info}`, 
     ''
-  ];
+  ].filter(Boolean);
+
+  lines.push(...categoryLines(summary.categories));
   
   if (result.issues.length) { 
-    lines.push('## Issues'); 
+    lines.push('', '## Issues'); 
     for (const i of result.issues) {
       lines.push(`- **[${i.severity.toUpperCase()}]** ${i.title}`);
       lines.push(`  - *Rule:* \`${i.id}\``);
+      lines.push(`  - *Category:* \`${i.category}\``);
       if (i.suggestedFix) lines.push(`  - *Fix:* ${i.suggestedFix}`);
     }
   }
@@ -29,7 +49,7 @@ export function buildMarkdownReport(result) {
     '', 
     '## Suggested Next Agent Prompt', 
     '', 
-    '> Inspect PRODUCT.md, DESIGN.md, and AGENT.md. Read `.vibe-design/fix-list.md` and resolve any listed issues. Implement the requested scope while preserving existing behavior. **MANDATORY**: Before you complete this task, you MUST run `npx vibe-design-md-architect audit` in the terminal, ensure there are 0 errors, and show me the final output score.'
+    '> Inspect PRODUCT.md, DESIGN.md, AGENTS.md, package.json, routing files, component structure, and existing tests. Read `.vibe-design/fix-list.md` and resolve any listed issues. Implement only the requested scope while preserving existing behavior. Before completion, run `npx vibe-design-md-architect audit`, ensure there are 0 errors, and show the final output score and readiness.'
   );
   
   return lines.join('\n');
@@ -37,14 +57,18 @@ export function buildMarkdownReport(result) {
 
 export function buildFixList(result) {
   const manualFixes = result.issues.filter(i => i.repairability !== 'auto' && !i.id.endsWith('-missing'));
+  const summary = result.summary || {};
   
   const lines = [
     'You are an expert AI frontend engineer.',
     'I have run `npx vibe-design-md-architect` on our design documents, and it has flagged the following issues that require human/agent intervention.',
     '',
-    'Please review the files and implement the suggested fixes:',
+    `Current readiness: ${summary.readiness || 'unknown'}`,
+    summary.readinessMessage ? `Decision: ${summary.readinessMessage}` : '',
+    '',
+    'Please review PRODUCT.md, DESIGN.md, AGENTS.md, and the files listed below before implementing:',
     ''
-  ];
+  ].filter(Boolean);
   
   if (manualFixes.length === 0) {
     lines.push('No manual fixes required. The design specs look solid!');
@@ -52,10 +76,11 @@ export function buildFixList(result) {
     for (const i of manualFixes) {
       lines.push(`- [ ] **File**: \`${i.file}\``);
       lines.push(`  - **Issue**: ${i.title}`);
+      lines.push(`  - **Category**: \`${i.category}\``);
       if (i.suggestedFix) lines.push(`  - **Required Action**: ${i.suggestedFix}`);
       lines.push('');
     }
-    lines.push('When you are done fixing these, run `npx vibe-design-md-architect audit` and confirm the score reaches 100.');
+    lines.push('When you are done fixing these, run `npx vibe-design-md-architect audit` and confirm the score reaches 100 with readiness `agent-ready`.');
   }
   
   return lines.join('\n');
