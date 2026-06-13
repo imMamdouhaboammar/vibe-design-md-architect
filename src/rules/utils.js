@@ -18,6 +18,11 @@ export function has(doc, rx) {
   return rx.test(doc || '');
 }
 
+export function hasUnresolvedPlaceholders(doc) {
+  if (!doc) return false;
+  return /\[[^\]\n]{3,120}\]|\bTODO\b|\bTBD\b|\bplaceholder\b|\bcoming soon\b|\.\.\./i.test(doc);
+}
+
 /**
  * Creates a standard rule object.
  * 
