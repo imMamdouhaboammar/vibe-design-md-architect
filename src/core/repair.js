@@ -1,6 +1,8 @@
 import { appendText, exists, writeText, readText } from './filesystem.js';
 import { templateFor } from './templates.js';
 
+const AGENT_INSTRUCTION_TARGET = '__AGENT_INSTRUCTIONS__';
+
 const autoSections = {
   'missing-target-users': ['PRODUCT.md', `## Target Users\n- Primary user:\n- Secondary user:`],
   'missing-acceptance-criteria': ['PRODUCT.md', `## Acceptance Criteria\n- Given..., when..., then...`],
@@ -27,30 +29,48 @@ const autoSections = {
   'api-key-masking': ['DESIGN.md', `## Security and Privacy Display\n- Never show full API keys, tokens, or secrets in UI. Mask or redact values by default.`],
   'auth-state-handling': ['DESIGN.md', `## Auth State Handling\n- Define UI for logged-out vs logged-in states.\n- Handle expired sessions gracefully.`],
   
-  'missing-do-not-break': ['AGENT.md', `## Do-Not-Break Rules\n- Preserve existing behavior.\n- Do not delete routes, state, styles, tests, or data flows unless explicitly requested.`],
-  'missing-verification-checklist': ['AGENT.md', `## Verification Checklist\n- [ ] Build passes.\n- [ ] Tests pass.\n- [ ] Main flows checked.\n- [ ] Mobile behavior checked.\n- [ ] Accessibility basics checked.`],
+  'missing-do-not-break': [AGENT_INSTRUCTION_TARGET, `## Do-Not-Break Rules\n- Preserve existing behavior.\n- Do not delete routes, state, styles, tests, or data flows unless explicitly requested.`],
+  'missing-verification-checklist': [AGENT_INSTRUCTION_TARGET, `## Verification Checklist\n- [ ] Build passes.\n- [ ] Tests pass.\n- [ ] Main flows checked.\n- [ ] Mobile behavior checked.\n- [ ] Accessibility basics checked.`],
   'missing-agent-handoff': ['DESIGN.md', `## Agent Handoff Instructions\n- Inspect before coding.\n- Summarize planned edits.\n- Verify responsive and accessibility behavior after changes.`]
 };
+
+function activeAgentInstructionFile(cwd) {
+  if (exists(cwd, 'AGENTS.md')) return 'AGENTS.md';
+  if (exists(cwd, 'AGENT.md')) return 'AGENT.md';
+  return 'AGENTS.md';
+}
+
+function resolveSectionFile(cwd, file) {
+  return file === AGENT_INSTRUCTION_TARGET ? activeAgentInstructionFile(cwd) : file;
+}
 
 export function applyRepairs(cwd, issues, flags = {}) {
   const generated = []; 
   const changed = []; 
   const repairs = [];
   
-  for (const file of ['PRODUCT.md', 'DESIGN.md', 'AGENT.md']) {
+  for (const file of ['PRODUCT.md', 'DESIGN.md']) {
     if (!exists(cwd, file)) { 
       writeText(cwd, file, templateFor(file), flags); 
       generated.push(file); 
       repairs.push({ file, action: 'created template' }); 
     }
   }
+
+  const agentInstructionFile = activeAgentInstructionFile(cwd);
+  if (!exists(cwd, agentInstructionFile)) {
+    writeText(cwd, agentInstructionFile, templateFor(agentInstructionFile), flags);
+    generated.push(agentInstructionFile);
+    repairs.push({ file: agentInstructionFile, action: 'created template' });
+  }
   
   for (const issue of issues) {
     if (issue.repairability !== 'auto' || issue.id.endsWith('-missing')) continue;
     const section = autoSections[issue.id]; 
     if (!section) continue;
-    
-    const fileContent = readText(cwd, section[0]) || '';
+
+    const targetFile = resolveSectionFile(cwd, section[0]);
+    const fileContent = readText(cwd, targetFile) || '';
     const startMarker = `<!-- vibe-design-md-architect:start ${issue.id} -->`;
     const endMarker = `<!-- vibe-design-md-architect:end ${issue.id} -->`;
     
@@ -59,10 +79,10 @@ export function applyRepairs(cwd, issues, flags = {}) {
     }
     
     const contentToInject = `\n${startMarker}\n${section[1]}\n${endMarker}\n`;
-    appendText(cwd, section[0], contentToInject, flags);
+    appendText(cwd, targetFile, contentToInject, flags);
     
-    if (!changed.includes(section[0])) changed.push(section[0]);
-    repairs.push({ file: section[0], rule: issue.id, action: 'appended safe section' });
+    if (!changed.includes(targetFile)) changed.push(targetFile);
+    repairs.push({ file: targetFile, rule: issue.id, action: 'appended safe section' });
   }
   
   return { generated, changed, repairs };
