@@ -1,7 +1,7 @@
 {
   "name": "vibe-design-md-architect",
   "version": "1.9.3",
-  "description": "Autopilot design quality gates for AI-assisted UI — 23 hard-blocking gates that create, audit, and amplify PRODUCT.md and DESIGN.md before implementation. Stops generic AI-looking frontend before it starts.",
+  "description": "Autopilot design quality gates for AI-assisted UI with agent readiness, taste calibration, AGENTS.md guidance, and placeholder blocking before implementation.",
   "type": "module",
   "exports": {
     ".": "./src/cli.js",
@@ -65,7 +65,11 @@
     "modal-governance",
     "overlay-governance",
     "viewport-governance",
-    "floating-ui"
+    "floating-ui",
+    "agents-md",
+    "ai-agent-readiness",
+    "taste-calibration",
+    "placeholder-gates"
   ],
   "author": "imMamdouhaboammar",
   "license": "MIT",
@@ -91,6 +95,7 @@
     "references/",
     "assets/",
     "evals/",
+    "docs/",
     "AGENTS.md",
     "SKILL.md",
     "README.md",
