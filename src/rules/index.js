@@ -1,6 +1,7 @@
 import { rule } from './utils.js';
 import { productRules } from './product.js';
 import { designRules } from './design.js';
+import { placeholderRules } from './placeholders.js';
 import { responsiveRules } from './responsive.js';
 import { uxRules } from './ux.js';
 import { accessibilityRules } from './accessibility.js';
@@ -38,6 +39,7 @@ export const rules = [
   ...readinessRules,
   ...productRules,
   ...designRules,
+  ...placeholderRules,
   ...tasteRules,
   ...responsiveRules,
   ...uxRules,
